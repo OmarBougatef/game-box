@@ -1,277 +1,400 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Love Arcade Pro - Ultimate</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-        :root { --bg: #05050a; --gold: #ffd700; --pink: #ff4d6d; }
-        * { box-sizing: border-box; touch-action: none; -webkit-user-select: none; }
-        body { margin: 0; background: var(--bg); color: #fff; font-family: 'Press Start 2P', cursive; overflow: hidden; height: 100vh; display: flex; align-items: center; justify-content: center; }
-        
-        #game-container { position: relative; width: 320px; height: 480px; border: 4px solid #fff; background: #000; overflow: hidden; box-shadow: 0 0 20px rgba(255, 77, 109, 0.3); }
-        canvas { display: block; image-rendering: pixelated; }
-
-        /* UI Overlay */
-        .overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.85); z-index: 100; text-align: center; padding: 20px; }
-        .hidden { display: none !important; }
-
-        /* Hub Grid */
-        .hub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-        .btn { background: #1a1a3a; border: 2px solid #fff; padding: 12px 5px; color: #fff; font-family: inherit; font-size: 8px; cursor: pointer; transition: 0.1s; }
-        .btn:active { transform: scale(0.95); background: var(--pink); }
-        .icon { font-size: 18px; display: block; margin-bottom: 5px; }
-
-        /* Stats */
-        #hud { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; font-size: 10px; pointer-events: none; z-index: 50; text-shadow: 2px 2px #000; }
-        
-        /* Mobile Controls */
-        #touch-controls { position: absolute; bottom: 0; width: 100%; height: 100px; display: flex; z-index: 60; }
-        .touch-zone { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Love Arcade Pro - Ultimate</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+:root { --bg:#05050a; --gold:#ffd700; --pink:#ff4d6d; }
+* { box-sizing:border-box; -webkit-user-select:none; }
+body {
+    margin:0; background:var(--bg); color:#fff;
+    font-family:'Press Start 2P',cursive;
+    overflow:hidden; height:100vh;
+    display:flex; align-items:center; justify-content:center;
+}
+#game-container {
+    position:relative; width:320px; height:480px;
+    border:4px solid #fff; background:#000; overflow:hidden;
+    box-shadow:0 0 20px rgba(255,77,109,.3);
+}
+canvas { display:block; image-rendering:pixelated; }
+.overlay {
+    position:absolute; inset:0;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    background:rgba(0,0,0,.85); z-index:100;
+    text-align:center; padding:20px;
+}
+.hidden { display:none!important; }
+.hub-grid {
+    display:grid; grid-template-columns:1fr 1fr;
+    gap:10px; width:100%;
+}
+.btn {
+    background:#1a1a3a; border:2px solid #fff;
+    padding:12px 5px; color:#fff; font-size:8px;
+    cursor:pointer; transition:.1s;
+}
+.btn:active { transform:scale(.95); background:var(--pink); }
+.icon { font-size:18px; display:block; margin-bottom:5px; }
+#hud {
+    position:absolute; top:10px; left:10px; right:10px;
+    display:flex; justify-content:space-between;
+    font-size:10px; pointer-events:none; z-index:50;
+    text-shadow:2px 2px #000;
+}
+#touch-controls {
+    position:absolute; bottom:0; width:100%; height:120px;
+    display:flex; z-index:60;
+}
+.touch-zone {
+    flex:1; background:rgba(255,255,255,.03);
+    border:1px solid rgba(255,255,255,.05);
+}
+</style>
 </head>
 <body>
+<div id="game-container">
+    <div id="hud">
+        <span id="score-display">SCORE: 0</span>
+        <span id="mode-display">MENU</span>
+    </div>
+    <canvas id="gameCanvas" width="320" height="480"></canvas>
 
-    <div id="game-container">
-        <div id="hud">
-            <span id="score-display">SCORE: 0</span>
-            <span id="mode-display">MENU</span>
-        </div>
-
-        <canvas id="gameCanvas"></canvas>
-
-        <div id="menu" class="overlay">
-            <h1 style="font-size: 14px; color: var(--gold); margin-bottom: 20px;">LOVE ARCADE V3</h1>
-            <div class="hub-grid">
-                <button class="btn" onclick="Engine.start('MAZE')"><span class="icon">🏰</span>MAZE</button>
-                <button class="btn" onclick="Engine.start('CATCH')"><span class="icon">❤️</span>CATCH</button>
-                <button class="btn" onclick="Engine.start('SHIELD')"><span class="icon">🛡️</span>SHIELD</button>
-                <button class="btn" onclick="Engine.start('FLY')"><span class="icon">🕊️</span>FLIGHT</button>
-                <button class="btn" onclick="Engine.start('KISS')"><span class="icon">⚡</span>TIMING</button>
-                <button class="btn" onclick="Engine.start('UP')"><span class="icon">🚀</span>ASCENT</button>
-            </div>
-        </div>
-
-        <div id="modal" class="overlay hidden">
-            <h2 id="modal-title" style="color:var(--gold)">BRAVO !</h2>
-            <p id="modal-text" style="font-size: 9px; line-height: 1.5;"></p>
-            <button class="btn" style="margin-top: 15px;" onclick="Engine.backToMenu()">RETOUR MENU</button>
-        </div>
-
-        <div id="touch-controls" class="hidden">
-            <div class="touch-zone" onpointerdown="Input.set('left', true)" onpointerup="Input.set('left', false)"></div>
-            <div class="touch-zone" onpointerdown="Input.set('right', true)" onpointerup="Input.set('right', false)"></div>
+    <div id="menu" class="overlay">
+        <h1 style="font-size:14px;color:var(--gold);margin-bottom:20px;">LOVE ARCADE V4</h1>
+        <div class="hub-grid">
+            <button class="btn" onclick="Engine.start('MAZE')"><span class="icon">🏰</span>MAZE</button>
+            <button class="btn" onclick="Engine.start('CATCH')"><span class="icon">❤️</span>CATCH</button>
+            <button class="btn" onclick="Engine.start('SHIELD')"><span class="icon">🛡️</span>SHIELD</button>
+            <button class="btn" onclick="Engine.start('FLY')"><span class="icon">🕊️</span>FLIGHT</button>
+            <button class="btn" onclick="Engine.start('KISS')"><span class="icon">⚡</span>TIMING</button>
+            <button class="btn" onclick="Engine.start('UP')"><span class="icon">🚀</span>ASCENT</button>
         </div>
     </div>
+
+    <div id="modal" class="overlay hidden">
+        <h2 id="modal-title" style="color:var(--gold)">BRAVO !</h2>
+        <p id="modal-text" style="font-size:9px;line-height:1.5;"></p>
+        <button class="btn" style="margin-top:15px;" onclick="Engine.backToMenu()">RETOUR MENU</button>
+    </div>
+
+    <div id="touch-controls" class="hidden">
+        <div class="touch-zone" data-dir="left"></div>
+        <div class="touch-zone" data-dir="right"></div>
+    </div>
+</div>
 
 <script>
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-canvas.width = 320;
-canvas.height = 480;
+
+const clamp = (v,min,max)=>Math.max(min,Math.min(max,v));
 
 const Input = {
-    left: false, right: false,
-    set(key, val) { this[key] = val; if(val) Engine.game?.onTap?.(); }
+    left:false, right:false, tap:false,
+    set(dir,val){ this[dir]=val; },
+    reset(){ this.left=this.right=this.tap=false; }
 };
 
+const addKeyControls = () => {
+    const keyMap = { ArrowLeft:'left', ArrowRight:'right', ' ':'tap', Space:'tap' };
+    window.addEventListener('keydown', e => {
+        if(keyMap[e.key] && !e.repeat){
+            if(keyMap[e.key]==='tap') Engine.game?.onTap?.();
+            else Input.set(keyMap[e.key],true);
+        }
+    });
+    window.addEventListener('keyup', e => {
+        if(keyMap[e.key]) Input.set(keyMap[e.key],false);
+    });
+};
+addKeyControls();
+
+const addTouchControls = () => {
+    const controls = document.getElementById('touch-controls');
+    controls.addEventListener('pointerdown', e => {
+        const dir = e.target.dataset.dir;
+        if(!dir){ Engine.game?.onTap?.(); return; }
+        Input.set(dir,true);
+        e.target.setPointerCapture(e.pointerId);
+    });
+    controls.addEventListener('pointerup', e => {
+        const dir = e.target.dataset.dir;
+        if(dir) Input.set(dir,false);
+        Engine.game?.onTap?.();
+    });
+    controls.addEventListener('pointercancel', e => {
+        const dir = e.target.dataset.dir;
+        if(dir) Input.set(dir,false);
+    });
+};
+addTouchControls();
+
 const Sprites = {
-    princess(x, y, s = 25) {
-        const p = s / 16;
-        ctx.fillStyle = '#f1c40f'; ctx.fillRect(x+4*p, y+2*p, 8*p, 4*p); // Cheveux
-        ctx.fillStyle = '#f5cba7'; ctx.fillRect(x+5*p, y+5*p, 6*p, 5*p); // Peau
-        ctx.fillStyle = '#fd79a8'; ctx.fillRect(x+4*p, y+10*p, 8*p, 6*p); // Robe
-        ctx.fillStyle = '#000'; ctx.fillRect(x+6*p, y+7*p, p, p); ctx.fillRect(x+9*p, y+7*p, p, p); // Yeux
+    princess(x,y,s=25){
+        const p=s/16;
+        ctx.fillStyle='#f1c40f'; ctx.fillRect(x+4*p,y+2*p,8*p,4*p);
+        ctx.fillStyle='#f5cba7'; ctx.fillRect(x+5*p,y+5*p,6*p,5*p);
+        ctx.fillStyle='#fd79a8'; ctx.fillRect(x+4*p,y+10*p,8*p,6*p);
+        ctx.fillStyle='#000'; ctx.fillRect(x+6*p,y+7*p,p,p); ctx.fillRect(x+9*p,y+7*p,p,p);
     },
-    heart(x, y, s = 20) {
-        ctx.font = `${s}px serif`; ctx.fillText("❤️", x, y + s);
-    }
+    heart(x,y,s=20){ ctx.font=`${s}px serif`; ctx.fillText("❤️",x,y+s); }
 };
 
 const Engine = {
-    active: false, game: null, score: 0,
-    start(mode) {
-        this.active = true; this.score = 0;
+    active:false, score:0, rafId:null, game:null,
+    start(mode){
+        this.reset();
         document.getElementById('menu').classList.add('hidden');
         document.getElementById('modal').classList.add('hidden');
         document.getElementById('touch-controls').classList.remove('hidden');
         document.getElementById('mode-display').innerText = mode;
-        
-        if(mode === 'MAZE') this.game = new MazeGame();
-        if(mode === 'CATCH') this.game = new CatchGame();
-        if(mode === 'SHIELD') this.game = new ShieldGame();
-        if(mode === 'FLY') this.game = new FlyGame();
-        if(mode === 'KISS') this.game = new KissGame();
-        if(mode === 'UP') this.game = new UpGame();
-        
+        const games = {
+            MAZE:MazeGame, CATCH:CatchGame, SHIELD:ShieldGame,
+            FLY:FlyGame, KISS:KissGame, UP:UpGame
+        };
+        this.game = new games[mode]();
+        this.active = true;
         this.loop();
     },
-    loop() {
+    reset(){
+        cancelAnimationFrame(this.rafId);
+        this.score = 0;
+        Input.reset();
+    },
+    loop(){
         if(!this.active) return;
-        ctx.fillStyle = '#000'; ctx.fillRect(0,0,320,480);
+        ctx.clearRect(0,0,320,480);
         this.game.update();
         this.game.draw();
         document.getElementById('score-display').innerText = `SCORE: ${this.score}`;
-        requestAnimationFrame(() => this.loop());
+        this.rafId = requestAnimationFrame(()=>this.loop());
     },
-    backToMenu() {
-        this.active = false;
-        document.getElementById('menu').classList.remove('hidden');
-        document.getElementById('modal').classList.add('hidden');
+    stopLoop(){
+        this.active=false;
+        cancelAnimationFrame(this.rafId);
+        Input.reset();
+    },
+    backToMenu(){
+        this.stopLoop();
         document.getElementById('touch-controls').classList.add('hidden');
+        document.getElementById('menu').classList.remove('hidden');
+        document.getElementById('mode-display').innerText='MENU';
     },
-    gameOver(title, text) {
-        this.active = false;
+    gameOver(title,text){
+        this.stopLoop();
         document.getElementById('modal').classList.remove('hidden');
-        document.getElementById('modal-title').innerText = title;
-        document.getElementById('modal-text').innerText = text;
+        document.getElementById('modal-title').innerText=title;
+        document.getElementById('modal-text').innerText=text;
     }
 };
 
-// --- 1. MAZE (REEL ALGORITHME DE GRILLE) ---
+/* --- 1. MAZE --- */
 class MazeGame {
-    constructor() {
-        this.p = { x: 20, y: 20 };
-        this.gridSize = 40;
-        this.cols = 8; this.rows = 10;
-        // Murs simplifiés pour mobile mais fixes et solides
-        this.walls = [
-            {x:40, y:0, w:10, h:100}, {x:0, y:120, w:120, h:10},
-            {x:160, y:60, w:10, h:150}, {x:80, y:200, w:200, h:10},
-            {x:40, y:280, w:10, h:120}, {x:120, y:350, w:200, h:10}
+    constructor(){
+        this.p={x:20,y:20,size:22};
+        this.speedX=3; this.gravity=1.2;
+        this.walls=[
+            {x:40,y:0,w:10,h:100},{x:0,y:120,w:120,h:10},
+            {x:160,y:60,w:10,h:150},{x:80,y:200,w:200,h:10},
+            {x:40,y:280,w:10,h:120},{x:120,y:350,w:200,h:10}
         ];
     }
-    update() {
-        let nextX = this.p.x + (Input.left ? -3 : Input.right ? 3 : 0);
-        let nextY = this.p.y + 1.2; // Descente auto
-        
-        // Collision
-        let hit = this.walls.some(w => nextX < w.x+w.w && nextX+20 > w.x && nextY < w.y+w.h && nextY+20 > w.y);
-        if(!hit) { this.p.x = nextX; this.p.y = nextY; }
-        else { Engine.gameOver("OUILLE !", "Tu as touché un mur !"); }
-
-        if(this.p.y > 440) Engine.gameOver("VICTOIRE !", "Tu as trouvé la sortie !");
-        this.p.x = Math.max(0, Math.min(300, this.p.x));
+    update(){
+        let vx = (Input.left?-this.speedX:0)+(Input.right?this.speedX:0);
+        let ny = this.p.y + this.gravity;
+        let nx = clamp(this.p.x+vx,0,320-this.p.size);
+        const nextRect = {x:nx,y:ny,w:this.p.size,h:this.p.size};
+        const collides = this.walls.some(w=>rectIntersect(nextRect,w));
+        if(collides) return Engine.gameOver("OUILLE !","Tu as touché un mur !");
+        this.p.x = nx; this.p.y = ny;
+        if(this.p.y+this.p.size >= 470) Engine.gameOver("VICTOIRE !","Tu as trouvé la sortie !");
     }
-    draw() {
-        ctx.fillStyle = "#3498db";
-        this.walls.forEach(w => ctx.fillRect(w.x, w.y, w.w, w.h));
-        ctx.fillStyle = "#2ecc71"; ctx.fillRect(0, 470, 320, 10); // Zone verte
-        Sprites.princess(this.p.x, this.p.y);
+    draw(){
+        ctx.fillStyle="#3498db";
+        this.walls.forEach(w=>ctx.fillRect(w.x,w.y,w.w,w.h));
+        ctx.fillStyle="#2ecc71"; ctx.fillRect(0,470,320,10);
+        Sprites.princess(this.p.x,this.p.y);
     }
 }
 
-// --- 2. CATCH ---
+/* --- 2. CATCH --- */
 class CatchGame {
-    constructor() { this.x = 140; this.hearts = []; this.timer = 0; }
-    update() {
-        if(Input.left) this.x -= 5; if(Input.right) this.x += 5;
-        this.x = Math.max(0, Math.min(280, this.x));
-        if(this.timer++ % 40 === 0) this.hearts.push({x: Math.random()*280, y: -20});
-        this.hearts.forEach((h, i) => {
-            h.y += 4 + (Engine.score * 0.2);
-            if(h.y > 380 && h.x > this.x - 20 && h.x < this.x + 30) { this.hearts.splice(i,1); Engine.score++; }
-            if(h.y > 480) Engine.gameOver("PERDU", "Un coeur est tombé...");
-        });
+    constructor(){
+        this.x=140; this.hearts=[]; this.spawnTimer=0; this.miss=0; this.maxMiss=3;
     }
-    draw() { 
-        this.hearts.forEach(h => Sprites.heart(h.x, h.y));
-        Sprites.princess(this.x, 400, 40); 
-    }
-}
-
-// --- 3. SHIELD ---
-class ShieldGame {
-    constructor() { this.a = 0; this.bullets = []; this.t = 0; }
-    update() {
-        this.a += 0.08;
-        if(this.t++ % 50 === 0) {
-            let ang = Math.random()*Math.PI*2;
-            this.bullets.push({x: 160+Math.cos(ang)*200, y: 240+Math.sin(ang)*200, ang: ang});
+    update(){
+        if(Input.left) this.x-=4;
+        if(Input.right) this.x+=4;
+        this.x = clamp(this.x,0,280);
+        if(this.spawnTimer++>=35){
+            this.spawnTimer=0;
+            this.hearts.push({x:Math.random()*280,y:-20,speed:3+Engine.score*0.05,hit:false});
         }
-        this.bullets.forEach((b, i) => {
-            b.x -= Math.cos(b.ang)*2.5; b.y -= Math.sin(b.ang)*2.5;
-            let d = Math.hypot(b.x-160, b.y-240);
-            if(d < 55) {
-                let hitA = Math.atan2(b.y-240, b.x-160);
-                let diff = Math.abs(hitA - (this.a % (Math.PI*2)));
-                if(diff < 0.8 || diff > 5.5) { this.bullets.splice(i,1); Engine.score++; }
-                else if(d < 20) Engine.gameOver("BOUM", "Protection brisée !");
+        this.hearts = this.hearts.filter(h=>{
+            h.y += h.speed;
+            if(h.y>=360 && h.y<=410 && h.x>this.x-10 && h.x<this.x+35){
+                Engine.score++; return false;
             }
+            if(h.y>480){ this.miss++; if(this.miss>=this.maxMiss) Engine.gameOver("PERDU","Trop de cœurs perdus !"); return false; }
+            return true;
         });
     }
-    draw() {
-        ctx.strokeStyle = "#00d2ff"; ctx.lineWidth = 6; ctx.beginPath();
-        ctx.arc(160, 240, 50, this.a, this.a+1.5); ctx.stroke();
-        this.bullets.forEach(b => { ctx.fillStyle="#ff4757"; ctx.beginPath(); ctx.arc(b.x, b.y, 5, 0, 7); ctx.fill(); });
-        Sprites.princess(145, 225, 30);
+    draw(){
+        this.hearts.forEach(h=>Sprites.heart(h.x,h.y));
+        Sprites.princess(this.x,400,40);
+        ctx.fillStyle="#fff"; ctx.fillText(`Miss: ${this.miss}/${this.maxMiss}`,10,460);
     }
 }
 
-// --- 4. FLY ---
+/* --- 3. SHIELD --- */
+class ShieldGame {
+    constructor(){
+        this.angle=0; this.bullets=[]; this.timer=0;
+        this.arcSize=1.3; this.radius=50;
+    }
+    update(){
+        this.angle = (this.angle + 0.07 + Engine.score*0.001) % (Math.PI*2);
+        if(this.timer++>=45){
+            this.timer=0;
+            const ang=Math.random()*Math.PI*2;
+            this.bullets.push({x:160+Math.cos(ang)*220,y:240+Math.sin(ang)*220,ang});
+        }
+        this.bullets = this.bullets.filter(b=>{
+            b.x -= Math.cos(b.ang)*2.1;
+            b.y -= Math.sin(b.ang)*2.1;
+            const dx=b.x-160, dy=b.y-240;
+            const dist=Math.hypot(dx,dy);
+            if(dist<this.radius+5){
+                const hitA=Math.atan2(dy,dx);
+                const diff=angleDiff(hitA,this.angle);
+                if(diff<=this.arcSize){ Engine.score++; return false; }
+                if(dist<20) { Engine.gameOver("BOUM","Protection brisée !"); return false; }
+            }
+            return dist>10;
+        });
+    }
+    draw(){
+        ctx.strokeStyle="#00d2ff"; ctx.lineWidth=6;
+        ctx.beginPath(); ctx.arc(160,240,this.radius,this.angle-this.arcSize/2,this.angle+this.arcSize/2); ctx.stroke();
+        this.bullets.forEach(b=>{ ctx.fillStyle="#ff4757"; ctx.beginPath(); ctx.arc(b.x,b.y,5,0,Math.PI*2); ctx.fill(); });
+        Sprites.princess(145,225,30);
+    }
+}
+
+/* --- 4. FLY --- */
 class FlyGame {
-    constructor() { this.y = 240; this.v = 0; this.obs = []; this.t = 0; }
-    onTap() { this.v = -5; }
-    update() {
-        this.v += 0.25; this.y += this.v;
-        if(this.t++ % 80 === 0) this.obs.push({x: 320, h: Math.random()*200+50});
-        this.obs.forEach((o, i) => {
-            o.x -= 3;
-            if(o.x < 80 && o.x > 30 && (this.y < o.h || this.y > o.h + 100)) Engine.gameOver("CRASH", "Aïe !");
-            if(o.x === 20) Engine.score++;
-        });
-        if(this.y > 480 || this.y < 0) Engine.gameOver("PERDU", "Reviens vers moi !");
+    constructor(){
+        this.y=240; this.v=0; this.obs=[]; this.timer=0; this.gap=120;
     }
-    draw() {
-        ctx.fillStyle = "#333";
-        this.obs.forEach(o => { ctx.fillRect(o.x, 0, 40, o.h); ctx.fillRect(o.x, o.h+120, 40, 480); });
-        Sprites.princess(50, this.y, 25);
-    }
-}
-
-// --- 5. KISS (TIMING) ---
-class KissGame {
-    constructor() { this.a = 0; this.target = Math.random()*Math.PI*2; }
-    onTap() {
-        let diff = Math.abs((this.a % (Math.PI*2)) - this.target);
-        if(diff < 0.4 || diff > 5.9) { Engine.score++; this.target = Math.random()*Math.PI*2; }
-        else Engine.gameOver("RATE", "Timing manqué !");
-    }
-    update() { this.a += 0.06 + (Engine.score * 0.005); }
-    draw() {
-        ctx.strokeStyle = "#222"; ctx.lineWidth = 15; ctx.beginPath(); ctx.arc(160, 240, 80, 0, 7); ctx.stroke();
-        ctx.strokeStyle = "#ffd700"; ctx.beginPath(); ctx.arc(160, 240, 80, this.target-0.3, this.target+0.3); ctx.stroke();
-        let kx = 160 + Math.cos(this.a)*80, ky = 240 + Math.sin(this.a)*80;
-        ctx.font = "30px Arial"; ctx.fillText("💋", kx-15, ky+10);
-        Sprites.princess(145, 225, 30);
-    }
-}
-
-// --- 6. UP ---
-class UpGame {
-    constructor() {
-        this.p = {x: 150, y: 300, v: 0};
-        this.plats = [];
-        for(let i=0; i<7; i++) this.plats.push({x: Math.random()*240, y: i*70, w: 70});
-    }
-    update() {
-        this.p.v += 0.2; this.p.y += this.p.v;
-        if(Input.left) this.p.x -= 4; if(Input.right) this.p.x += 4;
-        this.plats.forEach(pl => {
-            if(this.p.v > 0 && this.p.x+20 > pl.x && this.p.x < pl.x+pl.w && this.p.y+30 > pl.y && this.p.y+30 < pl.y+15) {
-                this.p.v = -8; Engine.score++;
+    onTap(){ this.v=-4.8; }
+    update(){
+        this.v += 0.22; this.y += this.v;
+        if(this.timer++>=70){
+            this.timer=0;
+            const holeTop = 40 + Math.random()*200;
+            this.obs.push({x:330,top:holeTop,bottom:holeTop+this.gap,scored:false});
+        }
+        this.obs = this.obs.filter(o=>{
+            o.x-=2.6;
+            if(!o.scored && o.x<50){ Engine.score++; o.scored=true; }
+            if(o.x<80 && o.x+40>30){
+                if(this.y<o.top || this.y+20>o.bottom) Engine.gameOver("CRASH","Aïe !");
             }
-            pl.y += 1.5; if(pl.y > 480) { pl.y = 0; pl.x = Math.random()*240; }
+            return o.x>-50;
         });
-        if(this.p.y > 480) Engine.gameOver("CHUTE", "Rattrapée !");
-        this.p.x = (this.p.x + 320) % 320;
+        if(this.y<0 || this.y>460) Engine.gameOver("PERDU","Reviens vers moi !");
     }
-    draw() {
-        ctx.fillStyle = "#ff4d6d";
-        this.plats.forEach(pl => ctx.fillRect(pl.x, pl.y, pl.w, 10));
-        Sprites.princess(this.p.x, this.p.y, 30);
+    draw(){
+        ctx.fillStyle="#333";
+        this.obs.forEach(o=>{
+            ctx.fillRect(o.x,0,40,o.top);
+            ctx.fillRect(o.x,o.bottom,40,480-o.bottom);
+        });
+        Sprites.princess(50,this.y,25);
     }
+}
+
+/* --- 5. KISS --- */
+class KissGame {
+    constructor(){
+        this.angle=0;
+        this.target=Math.random()*Math.PI*2;
+        this.speedBase=0.06;
+    }
+    onTap(){
+        const diff = angleDiff(this.angle,this.target);
+        if(diff<0.35){
+            Engine.score++;
+            this.target=Math.random()*Math.PI*2;
+        } else Engine.gameOver("RATÉ","Timing manqué !");
+    }
+    update(){
+        const speed = this.speedBase + Math.min(Engine.score*0.003,0.05);
+        this.angle = (this.angle + speed) % (Math.PI*2);
+    }
+    draw(){
+        ctx.strokeStyle="#222"; ctx.lineWidth=15;
+        ctx.beginPath(); ctx.arc(160,240,80,0,Math.PI*2); ctx.stroke();
+        ctx.strokeStyle="#ffd700"; ctx.lineWidth=8;
+        ctx.beginPath(); ctx.arc(160,240,80,this.target-0.3,this.target+0.3); ctx.stroke();
+
+        const kx=160+Math.cos(this.angle)*80;
+        const ky=240+Math.sin(this.angle)*80;
+        ctx.font="30px Arial"; ctx.fillText("💋",kx-15,ky+10);
+        Sprites.princess(145,225,30);
+    }
+}
+
+/* --- 6. UP --- */
+class UpGame {
+    constructor(){
+        this.p={x:150,y:300,v:0,width:24,height:30};
+        this.plats=[];
+        for(let i=0;i<8;i++) this.plats.push({x:Math.random()*250,y:i*60,width:70});
+    }
+    update(){
+        this.p.v += 0.2;
+        if(Input.left) this.p.x-=4;
+        if(Input.right) this.p.x+=4;
+        this.p.x = (this.p.x+320)%320;
+        this.p.y += this.p.v;
+
+        this.plats.forEach(pl=>{
+            pl.y += 1.2 + Math.min(Engine.score*0.05,2);
+            if(pl.y>480){
+                pl.y= -10;
+                pl.x=Math.random()*250;
+                pl.width=60+Math.random()*40;
+            }
+            if(this.p.v>0 && rectIntersect(
+                {x:this.p.x,y:this.p.y,width:this.p.width,height:this.p.height},
+                {x:pl.x,y:pl.y,width:pl.width,height:10}
+            )){
+                this.p.v=-7;
+                Engine.score++;
+            }
+        });
+        if(this.p.y>480) Engine.gameOver("CHUTE","Rattrapée !");
+    }
+    draw(){
+        ctx.fillStyle="#ff4d6d";
+        this.plats.forEach(pl=>ctx.fillRect(pl.x,pl.y,pl.width,10));
+        Sprites.princess(this.p.x,this.p.y,30);
+    }
+}
+
+/* --- helpers --- */
+function rectIntersect(a,b){
+    return a.x < b.x + b.w && a.x + a.w > b.x &&
+           a.y < b.y + b.h && a.y + a.h > b.y;
+}
+function angleDiff(a,b){
+    let diff=Math.abs((a-b)%(Math.PI*2));
+    return diff>Math.PI ? (Math.PI*2)-diff : diff;
 }
 </script>
 </body>
