@@ -3,423 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Love Arcade - Final Version</title>
+    <title>Love Arcade - Fixed</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-        
-        :root { --bg: #0f0f1a; --gold: #ffd700; --pink: #ff0055; --blue: #00d2ff; }
-        
-        * { box-sizing: border-box; touch-action: none; user-select: none; -webkit-user-select: none; }
-        
-        body {
-            margin: 0; padding: 0;
-            background-color: var(--bg);
-            color: #fff;
-            font-family: 'Press Start 2P', cursive;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 100vh; overflow: hidden;
-        }
-
-        #game-wrapper {
-            position: relative;
-            width: 100%; max-width: 400px;
-            height: 100%; max-height: 800px;
-            display: flex; flex-direction: column;
-        }
-
-        /* --- ZONE DE JEU --- */
-        canvas {
-            background: #000;
-            display: block;
-            width: 100%;
-            flex-grow: 1; /* Prend toute la place dispo */
-            image-rendering: pixelated;
-            border-bottom: 2px solid var(--pink);
-        }
-
-        /* --- UI & HUD --- */
-        #ui-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; display: flex; flex-direction: column;
-        }
-        
-        .top-bar {
-            padding: 10px; display: flex; justify-content: space-between;
-            font-size: 10px; color: var(--gold); text-shadow: 1px 1px #000;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
-        }
-
-        /* --- MENUS --- */
-        .screen {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 15, 26, 0.98);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 100; pointer-events: auto;
-        }
-        .hidden { display: none !important; }
-
-        h1 { font-size: 16px; color: var(--pink); margin-bottom: 20px; text-align: center; line-height: 1.5; }
-        
-        .grid-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 80%; }
-        .btn-game {
-            background: #222; border: 2px solid #fff; color: #fff;
-            padding: 15px 5px; font-family: inherit; font-size: 9px;
-            cursor: pointer; text-align: center; display: flex; flex-direction: column; align-items: center;
-        }
-        .btn-game span { font-size: 20px; margin-bottom: 5px; }
-        .btn-game:active { background: var(--pink); transform: scale(0.95); }
-
-        .btn-main {
-            margin-top: 20px; padding: 15px 30px; background: var(--gold); color: #000;
-            border: none; font-family: inherit; font-size: 10px; cursor: pointer;
-        }
-
-        /* --- CONTROLS --- */
-        #controls-area {
-            height: 120px; background: #111;
-            display: flex; align-items: center; justify-content: center;
-            border-top: 2px solid #333; flex-shrink: 0;
-        }
-
-        /* 2-BUTTONS (Pour les jeux simples) */
-        #ctrl-2btn { width: 100%; height: 100%; display: flex; }
-        .btn-half { flex: 1; display: flex; align-items: center; justify-content: center; border-right: 1px solid #333; font-size: 10px; color: #555; }
-        .btn-half:active { background: #222; color: #fff; }
-
-        /* D-PAD (Pour le labyrinthe) */
-        #ctrl-dpad {
-            display: grid; grid-template-columns: 50px 50px 50px; grid-template-rows: 50px 50px; gap: 5px;
-        }
-        .d-btn { background: #333; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #fff; box-shadow: 0 4px 0 #000; }
-        .d-btn:active { transform: translateY(4px); box-shadow: 0 0 0 #000; background: var(--pink); }
-
+        body { margin: 0; background: #000; color: #fff; font-family: 'Press Start 2P', cursive; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+        canvas { background: #111; display: block; width: 100vw; height: 60vh; image-rendering: pixelated; border-bottom: 4px solid #ff0055; }
+        .ui { flex-grow: 1; display: flex; flex-direction: column; background: #0a0a0a; }
+        .stats { padding: 10px; font-size: 10px; display: flex; justify-content: space-between; color: #ffd700; }
+        .controls { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; flex-grow: 1; gap: 5px; padding: 5px; }
+        .btn { background: #222; border: 2px solid #444; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; border-radius: 10px; }
+        .btn:active { background: #ff0055; border-color: #fff; }
+        .full-btn { grid-column: span 2; }
+        .menu { position: absolute; inset: 0; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 90%; }
+        .m-btn { background: #1a1a1a; border: 2px solid #fff; padding: 15px 5px; color: #fff; font-family: inherit; font-size: 8px; }
     </style>
 </head>
 <body>
 
-<div id="game-wrapper">
-    <div id="ui-layer">
-        <div class="top-bar">
-            <span id="score-el">SCORE: 0</span>
-            <span id="title-el">MENU</span>
-        </div>
+<canvas id="c"></canvas>
+<div class="ui">
+    <div class="stats"><span id="sc">SCORE: 0</span><span id="gm">MENU</span></div>
+    <div id="ctrls" class="controls">
+        <div class="btn" onpointerdown="K.l=1" onpointerup="K.l=0">◀</div>
+        <div class="btn" onpointerdown="K.r=1" onpointerup="K.r=0">▶</div>
+        <div class="btn" onpointerdown="K.u=1" onpointerup="K.u=0">▲</div>
+        <div class="btn" onpointerdown="K.d=1" onpointerup="K.d=0">▼</div>
     </div>
+</div>
 
-    <canvas id="cvs"></canvas>
-
-    <div id="controls-area">
-        <div id="ctrl-2btn" class="hidden">
-            <div class="btn-half" onpointerdown="Input.left=true" onpointerup="Input.left=false">◀ GAUCHE</div>
-            <div class="btn-half" onpointerdown="Input.right=true" onpointerup="Input.right=false">DROITE ▶</div>
-        </div>
-        <div id="ctrl-dpad" class="hidden">
-            <div class="d-btn" style="grid-column: 2;" onpointerdown="Input.up=true" onpointerup="Input.up=false">▲</div>
-            <div class="d-btn" style="grid-column: 1; grid-row: 2;" onpointerdown="Input.left=true" onpointerup="Input.left=false">◀</div>
-            <div class="d-btn" style="grid-column: 2; grid-row: 2;" onpointerdown="Input.down=true" onpointerup="Input.down=false">▼</div>
-            <div class="d-btn" style="grid-column: 3; grid-row: 2;" onpointerdown="Input.right=true" onpointerup="Input.right=false">▶</div>
-        </div>
-    </div>
-
-    <div id="screen-menu" class="screen">
-        <h1>LOVE ARCADE<br><span style="font-size:10px; color:#fff">Ultimate Edition</span></h1>
-        <div class="grid-menu">
-            <button class="btn-game" onclick="Game.start('MAZE')"><span>🏰</span>MAZE</button>
-            <button class="btn-game" onclick="Game.start('CATCH')"><span>🍎</span>CATCH</button>
-            <button class="btn-game" onclick="Game.start('SHIELD')"><span>🛡️</span>SHIELD</button>
-            <button class="btn-game" onclick="Game.start('FLY')"><span>🕊️</span>FLY</button>
-            <button class="btn-game" onclick="Game.start('KISS')"><span>⚡</span>KISS</button>
-            <button class="btn-game" onclick="Game.start('JUMP')"><span>🚀</span>JUMP</button>
-        </div>
-    </div>
-
-    <div id="screen-over" class="screen hidden">
-        <h1 id="over-title">BRAVO !</h1>
-        <p id="over-msg" style="font-size:10px; text-align:center; padding:20px; line-height:1.6; color:#ccc;">...</p>
-        <button class="btn-main" onclick="Game.menu()">RETOUR AU MENU</button>
+<div id="menu" class="menu">
+    <h2 style="color:#ff0055; font-size:14px;">LOVE ARCADE V4</h2>
+    <div class="grid">
+        <button class="m-btn" onclick="start('MAZE')">🏰 MAZE</button>
+        <button class="m-btn" onclick="start('CATCH')">❤️ CATCH</button>
+        <button class="m-btn" onclick="start('SHIELD')">🛡️ SHIELD</button>
+        <button class="m-btn" onclick="start('FLY')">🕊️ FLY</button>
+        <button class="m-btn" onclick="start('KISS')">💋 KISS</button>
+        <button class="m-btn" onclick="start('UP')">🚀 UP</button>
     </div>
 </div>
 
 <script>
-// --- CONFIG & UTILS ---
-const canvas = document.getElementById('cvs');
-const ctx = canvas.getContext('2d');
-// Fix resolution
-const CW = 320;
-const CH = 320; // Carré parfait pour simplifier
-canvas.width = CW; canvas.height = CH;
+const cvs = document.getElementById('c'), ctx = cvs.getContext('2d');
+const K = {l:0, r:0, u:0, d:0};
+let mode = '', score = 0, p = {}, items = [], timer = 0, active = false;
 
-const Input = { left: false, right: false, up: false, down: false };
+// Fix canvas size
+cvs.width = 320; cvs.height = 320;
 
-// --- ART ---
-function drawPrincess(x, y, s) {
-    const p = s / 16;
-    ctx.fillStyle = '#ffdbac'; ctx.fillRect(x+5*p, y+5*p, 6*p, 4*p); // Visage
-    ctx.fillStyle = '#f1c40f'; ctx.fillRect(x+4*p, y+2*p, 8*p, 4*p); // Cheveux
-    ctx.fillRect(x+3*p, y+4*p, 2*p, 6*p); ctx.fillRect(x+11*p, y+4*p, 2*p, 6*p);
-    ctx.fillStyle = '#ffd700'; ctx.fillRect(x+6*p, y, 4*p, 2*p); // Couronne
-    ctx.fillStyle = '#e91e63'; ctx.fillRect(x+5*p, y+10*p, 6*p, 6*p); // Robe haut
-    ctx.fillStyle = '#ff69b4'; ctx.fillRect(x+3*p, y+13*p, 10*p, 3*p); // Robe bas
-    ctx.fillStyle = '#000'; ctx.fillRect(x+6*p, y+6*p, p, p); ctx.fillRect(x+9*p, y+6*p, p, p); // Yeux
+function start(m) {
+    mode = m; score = 0; items = []; timer = 0; active = true;
+    document.getElementById('menu').style.display = 'none';
+    document.getElementById('gm').innerText = m;
+    init();
 }
 
-// --- GAME ENGINE ---
-const Game = {
-    mode: null,
-    active: false,
-    score: 0,
-    state: {},
-    loopId: null,
+function over(t) {
+    active = false;
+    document.getElementById('menu').style.display = 'flex';
+    alert(t + " | Score: " + score);
+}
 
-    start(mode) {
-        this.mode = mode;
-        this.active = true;
-        this.score = 0;
-        this.state = {}; 
-        
-        // UI RESET
-        document.getElementById('screen-menu').classList.add('hidden');
-        document.getElementById('screen-over').classList.add('hidden');
-        document.getElementById('title-el').innerText = mode;
-        
-        // INPUT DISPLAY
-        if(mode === 'MAZE') {
-            document.getElementById('ctrl-2btn').classList.add('hidden');
-            document.getElementById('ctrl-dpad').classList.remove('hidden');
-        } else {
-            document.getElementById('ctrl-2btn').classList.remove('hidden');
-            document.getElementById('ctrl-dpad').classList.add('hidden');
-        }
+function init() {
+    if(mode==='MAZE') p = {x:40, y:40};
+    if(mode==='CATCH') p = {x:160};
+    if(mode==='SHIELD') p = {a:0};
+    if(mode==='FLY') p = {y:160, v:0};
+    if(mode==='KISS') p = {a:0, t:Math.random()*6, s:0.05};
+    if(mode==='UP') p = {x:160, y:280, v:0};
+}
 
-        this.init();
-        this.loop();
-    },
+function loop() {
+    if(!active) { requestAnimationFrame(loop); return; }
+    ctx.clearRect(0,0,320,320);
+    timer++;
 
-    menu() {
-        this.active = false;
-        cancelAnimationFrame(this.loopId);
-        document.getElementById('screen-menu').classList.remove('hidden');
-        document.getElementById('screen-over').classList.add('hidden');
-    },
-
-    over(title, msg) {
-        this.active = false;
-        document.getElementById('over-title').innerText = title;
-        document.getElementById('over-msg').innerText = msg;
-        document.getElementById('screen-over').classList.remove('hidden');
-    },
-
-    init() {
-        const s = this.state;
-        if(this.mode === 'MAZE') {
-            // 0: Chemin, 1: Mur, 2: Départ, 3: Arrivée
-            s.map = [
-                [1,1,1,1,1,1,1,1,1,1],
-                [1,2,0,0,1,0,0,0,0,1],
-                [1,1,1,0,1,0,1,1,0,1],
-                [1,0,0,0,0,0,1,0,0,1],
-                [1,0,1,1,1,0,1,0,1,1],
-                [1,0,1,0,0,0,0,0,0,1],
-                [1,0,1,0,1,1,1,1,0,1],
-                [1,0,0,0,1,3,0,0,0,1],
-                [1,1,1,1,1,1,1,1,1,1]
-            ];
-            s.tileSize = CW / 10;
-            s.p = {x: 1, y: 1}; // Case coordonnées
-            s.moveTimer = 0;
-        }
-        else if(this.mode === 'CATCH') {
-            s.p = CW/2; s.items = []; s.timer = 0;
-        }
-        else if(this.mode === 'SHIELD') {
-            s.angle = 0; s.ennemies = []; s.timer = 0;
-        }
-        else if(this.mode === 'FLY') {
-            s.y = CH/2; s.v = 0; s.walls = []; s.timer = 0;
-        }
-        else if(this.mode === 'KISS') {
-            s.angle = 0; s.target = Math.random()*6; s.speed = 0.05;
-        }
-        else if(this.mode === 'JUMP') {
-            s.p = {x:CW/2, y:CH-50, vx:0, vy:0};
-            s.plats = [];
-            for(let i=0; i<6; i++) s.plats.push({x:Math.random()*(CW-50), y:i*60, w:50});
-        }
-    },
-
-    update() {
-        const s = this.state;
-        
-        // --- 1. MAZE (GRID BASED) ---
-        if(this.mode === 'MAZE') {
-            if(s.moveTimer > 0) s.moveTimer--;
-            else {
-                let dx = 0, dy = 0;
-                if(Input.up) dy = -1;
-                else if(Input.down) dy = 1;
-                else if(Input.left) dx = -1;
-                else if(Input.right) dx = 1;
-
-                if(dx !== 0 || dy !== 0) {
-                    let targetX = s.p.x + dx;
-                    let targetY = s.p.y + dy;
-                    // Collision check avec la grille
-                    if(s.map[targetY] && s.map[targetY][targetX] !== 1) {
-                        s.p.x = targetX; s.p.y = targetY;
-                        s.moveTimer = 8; // Vitesse de déplacement
-                        if(s.map[targetY][targetX] === 3) this.over("GAGNÉ !", "Tu as trouvé ton chemin vers mon coeur !");
-                    }
-                }
-            }
-        }
-
-        // --- 2. CATCH ---
-        else if(this.mode === 'CATCH') {
-            if(Input.left) s.p -= 4; if(Input.right) s.p += 4;
-            s.p = Math.max(20, Math.min(CW-20, s.p));
-            if(s.timer++ % 30 === 0) s.items.push({x:Math.random()*CW, y:-20});
-            s.items.forEach((it, i) => {
-                it.y += 3;
-                if(it.y > CH-40 && Math.abs(it.x - s.p) < 30) { s.items.splice(i,1); this.score++; }
-                else if(it.y > CH) this.over("PERDU", "Un coeur brisé...");
-            });
-        }
-
-        // --- 3. SHIELD ---
-        else if(this.mode === 'SHIELD') {
-            if(Input.left) s.angle -= 0.1; if(Input.right) s.angle += 0.1;
-            if(s.timer++ % 40 === 0) {
-                let a = Math.random() * Math.PI * 2;
-                s.ennemies.push({x:CW/2 + Math.cos(a)*200, y:CH/2 + Math.sin(a)*200, a:a});
-            }
-            s.ennemies.forEach((e, i) => {
-                e.x -= Math.cos(e.a)*2; e.y -= Math.sin(e.a)*2;
-                let d = Math.hypot(e.x - CW/2, e.y - CH/2);
-                if(d < 40) {
-                   // Check Shield Angle
-                   let shieldA = s.angle % (Math.PI*2);
-                   if(shieldA < 0) shieldA += Math.PI*2;
-                   let attackA = Math.atan2(e.y-CH/2, e.x-CW/2); 
-                   if(attackA < 0) attackA += Math.PI*2;
-                   
-                   let diff = Math.abs(shieldA - attackA);
-                   if(diff > Math.PI) diff = 2*Math.PI - diff; // Wrap around
-
-                   if(diff < 1) { s.ennemies.splice(i,1); this.score++; } // Blocked
-                   else this.over("TOUCHÉE !", "Protège-toi mieux !");
-                }
-            });
-        }
-
-        // --- 4. FLY ---
-        else if(this.mode === 'FLY') {
-            s.v += 0.2; s.y += s.v;
-            if((Input.left || Input.right) && !s.jumpLock) { s.v = -4; s.jumpLock = true; }
-            if(!Input.left && !Input.right) s.jumpLock = false;
-
-            if(s.timer++ % 90 === 0) s.walls.push({x:CW, h:Math.random()*(CH-150)});
-            s.walls.forEach((w,i) => {
-                w.x -= 2;
-                // Collision simple AABB
-                if(w.x < 60 && w.x > 20) {
-                    if(s.y < w.h || s.y > w.h + 100) this.over("CRASH", "Attention aux murs !");
-                }
-                if(w.x < -40) { s.walls.splice(i,1); this.score++; }
-            });
-            if(s.y > CH || s.y < 0) this.over("CHUTE", "Reste dans les airs !");
-        }
-
-        // --- 5. KISS ---
-        else if(this.mode === 'KISS') {
-            s.angle += s.speed;
-            if(Input.left || Input.right) {
-                if(!s.lock) {
-                    s.lock = true;
-                    let diff = Math.abs((s.angle%(Math.PI*2)) - s.target);
-                    if(diff < 0.5) { this.score++; s.target = Math.random()*6; s.speed += 0.01; }
-                    else this.over("RATÉ", "Pas le bon moment !");
-                }
-            } else s.lock = false;
-        }
-
-        // --- 6. JUMP ---
-        else if(this.mode === 'JUMP') {
-            s.p.vy += 0.2; s.p.y += s.p.vy;
-            if(Input.left) s.p.x -= 3; if(Input.right) s.p.x += 3;
-            // Wrap around
-            if(s.p.x < 0) s.p.x = CW; if(s.p.x > CW) s.p.x = 0;
-
-            s.plats.forEach(pl => {
-                if(s.p.vy > 0 && s.p.x > pl.x - 10 && s.p.x < pl.x + pl.w + 10 && Math.abs(s.p.y - pl.y) < 10) {
-                    s.p.vy = -6; this.score++;
-                }
-                pl.y += (s.p.y < CH/2 && s.p.vy < 0) ? -s.p.vy : 0; // Caméra
-                if(pl.y > CH) { pl.y = 0; pl.x = Math.random()*(CW-50); }
-            });
-            if(s.p.y > CH) this.over("TOMBER", "On remonte !");
-        }
-
-        document.getElementById('score-el').innerText = "SCORE: " + this.score;
-    },
-
-    draw() {
-        ctx.fillStyle = '#000'; ctx.fillRect(0,0,CW,CH);
-        const s = this.state;
-
-        if(this.mode === 'MAZE') {
-            s.map.forEach((row, y) => {
-                row.forEach((cell, x) => {
-                    if(cell===1) { ctx.fillStyle = '#444'; ctx.fillRect(x*s.tileSize, y*s.tileSize, s.tileSize, s.tileSize); }
-                    if(cell===3) { ctx.fillStyle = '#2ecc71'; ctx.fillRect(x*s.tileSize, y*s.tileSize, s.tileSize, s.tileSize); }
-                });
-            });
-            drawPrincess(s.p.x*s.tileSize + 2, s.p.y*s.tileSize + 2, s.tileSize-4);
-        }
-
-        else if(this.mode === 'CATCH') {
-            s.items.forEach(it => { ctx.font="20px serif"; ctx.fillText("❤️", it.x, it.y); });
-            drawPrincess(s.p-20, CH-50, 40);
-        }
-
-        else if(this.mode === 'SHIELD') {
-            drawPrincess(CW/2-20, CH/2-20, 40);
-            ctx.strokeStyle = '#00d2ff'; ctx.lineWidth = 4;
-            ctx.beginPath(); ctx.arc(CW/2, CH/2, 50, s.angle-1, s.angle+1); ctx.stroke();
-            s.ennemies.forEach(e => {
-                ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(e.x, e.y, 5, 0, Math.PI*2); ctx.fill();
-            });
-        }
-
-        else if(this.mode === 'FLY') {
-            drawPrincess(40, s.y, 30);
-            ctx.fillStyle = '#555';
-            s.walls.forEach(w => {
-                ctx.fillRect(w.x, 0, 40, w.h);
-                ctx.fillRect(w.x, w.h+100, 40, CH);
-            });
-        }
-
-        else if(this.mode === 'KISS') {
-            drawPrincess(CW/2-20, CH/2-20, 40);
-            ctx.strokeStyle = '#333'; ctx.lineWidth = 10; ctx.beginPath(); ctx.arc(CW/2, CH/2, 80, 0, 7); ctx.stroke();
-            ctx.strokeStyle = 'gold'; ctx.beginPath(); ctx.arc(CW/2, CH/2, 80, s.target-0.4, s.target+0.4); ctx.stroke();
-            let kx = CW/2 + Math.cos(s.angle)*80; let ky = CH/2 + Math.sin(s.angle)*80;
-            ctx.font="20px serif"; ctx.fillText("💋", kx-10, ky+5);
-        }
-
-        else if(this.mode === 'JUMP') {
-            ctx.fillStyle = '#ff0055';
-            s.plats.forEach(p => ctx.fillRect(p.x, p.y, p.w, 8));
-            drawPrincess(s.p.x, s.p.y, 30);
-        }
-    },
-
-    loop() {
-        if(!this.active) return;
-        this.update();
-        this.draw();
-        this.loopId = requestAnimationFrame(() => this.loop());
+    if(mode==='MAZE') {
+        if(K.l) p.x-=2; if(K.r) p.x+=2; if(K.u) p.y-=2; if(K.d) p.y+=2;
+        ctx.fillStyle='#444'; ctx.fillRect(100,0,20,200); ctx.fillRect(200,100,20,220); // Murs simples
+        if(p.x<0||p.x>300||p.y<0||p.y>300) over("MUR !");
+        ctx.fillStyle='#0f0'; ctx.fillRect(280,280,40,40);
+        if(p.x>270&&p.y>270) over("GAGNE !");
     }
-};
+
+    if(mode==='CATCH') {
+        if(K.l) p.x-=4; if(K.r) p.x+=4;
+        if(timer%40===0) items.push({x:Math.random()*300, y:0});
+        items.forEach((it,i)=>{
+            it.y+=3; ctx.fillText("❤️", it.x, it.y);
+            if(it.y>280 && Math.abs(it.x-p.x)<30) { items.splice(i,1); score++; }
+            if(it.y>320) over("PERDU");
+        });
+    }
+
+    if(mode==='SHIELD') {
+        if(K.l) p.a-=0.1; if(K.r) p.a+=0.1;
+        ctx.strokeStyle='#0df'; ctx.lineWidth=5; ctx.beginPath();
+        ctx.arc(160,160,50,p.a,p.a+1); ctx.stroke();
+        if(timer%50===0) { let a=Math.random()*7; items.push({x:160+Math.cos(a)*150, y:160+Math.sin(a)*150, a:a}); }
+        items.forEach((e,i)=>{
+            e.x-=Math.cos(e.a)*2; e.y-=Math.sin(e.a)*2; ctx.fillStyle='red'; ctx.fillRect(e.x,e.y,5,5);
+            if(Math.hypot(e.x-160, e.y-160)<50) {
+                if(Math.abs((Math.atan2(e.y-160,e.x-160)-p.a)%7)<1) { items.splice(i,1); score++; }
+                else over("TOUCHEE");
+            }
+        });
+    }
+
+    if(mode==='FLY') {
+        p.v+=0.2; p.y+=p.v; if(K.u||K.l||K.r) p.v=-4;
+        if(timer%100===0) items.push({x:320, h:Math.random()*150});
+        items.forEach((w,i)=>{
+            w.x-=2; ctx.fillStyle='#555'; ctx.fillRect(w.x,0,30,w.h); ctx.fillRect(w.x,w.h+100,30,320);
+            if(w.x<60&&w.x>30&&(p.y<w.h||p.y>w.h+80)) over("BOOM");
+            if(w.x===-20) score++;
+        });
+        if(p.y>320||p.y<0) over("EXIT");
+    }
+
+    if(mode==='KISS') {
+        p.a+=p.s; ctx.strokeStyle='gold'; ctx.beginPath(); ctx.arc(160,160,60,p.t,p.t+0.5); ctx.stroke();
+        let kx=160+Math.cos(p.a)*60, ky=160+Math.sin(p.a)*60; ctx.fillText("💋", kx, ky);
+        if(K.u||K.l||K.r) { if(Math.abs(p.a%7-p.t)<0.5) { score++; p.t=Math.random()*6; p.s+=0.01; } else over("RATE"); }
+    }
+
+    if(mode==='UP') {
+        p.v+=0.2; p.y+=p.v; if(K.l) p.x-=3; if(K.r) p.x+=3;
+        if(items.length===0) for(let i=0;i<5;i++) items.push({x:Math.random()*250, y:i*60});
+        items.forEach(pl=>{
+            ctx.fillStyle='#f05'; ctx.fillRect(pl.x,pl.y,60,10);
+            if(p.v>0&&p.x>pl.x-20&&p.x<pl.x+60&&Math.abs(p.y-pl.y)<10) { p.v=-7; score++; }
+            pl.y+=1; if(pl.y>320) { pl.y=0; pl.x=Math.random()*250; }
+        });
+        if(p.y>320) over("CHUTE");
+    }
+
+    ctx.fillStyle='#ff0055'; ctx.fillRect(p.x||160, p.y||160, 20, 20); // Joueur
+    document.getElementById('sc').innerText = "SCORE: " + score;
+    requestAnimationFrame(loop);
+}
+loop();
 </script>
 </body>
 </html>
