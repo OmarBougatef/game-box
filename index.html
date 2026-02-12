@@ -2,191 +2,206 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lettre d'Amour Pixel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Top Secret Love</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
         :root {
-            --bg: #ffccd5;
-            --env-color: #ff4d6d;
-            --env-dark: #c9184a;
-            --letter-bg: #fff5f5;
-            --text-color: #590d22;
+            --bg: #1a1a2e;
+            --pink-light: #ff758f;
+            --pink-main: #ff4d6d;
+            --pink-dark: #a4133c;
+            --paper: #fffcf2;
         }
 
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
         body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            margin: 0; padding: 0;
+            background: var(--bg);
             height: 100vh;
-            background-color: var(--bg);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
             font-family: 'Press Start 2P', cursive;
             overflow: hidden;
         }
 
-        /* Container de l'enveloppe */
-        .envelope-wrapper {
+        /* Effet de particules en fond */
+        #canvas-bg {
+            position: absolute; inset: 0;
+            z-index: 0; pointer-events: none;
+        }
+
+        .container {
             position: relative;
-            cursor: pointer;
-            transition: transform 0.3s;
+            z-index: 10;
+            perspective: 1000px;
         }
 
-        .envelope-wrapper:hover {
-            transform: scale(1.05);
-        }
-
+        /* L'ENVELOPPE */
         .envelope {
             position: relative;
-            width: 280px;
-            height: 180px;
-            background-color: var(--env-dark);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            width: 300px; height: 200px;
+            background: var(--pink-dark);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            cursor: pointer;
+            transition: transform 0.3s ease;
         }
 
-        /* Le rabat de l'enveloppe */
+        .envelope:hover { transform: translateY(-5px); }
+
+        /* Le rabat (Flap) */
         .flap {
-            position: absolute;
-            top: 0;
-            width: 0;
-            height: 0;
-            border-left: 140px solid transparent;
-            border-right: 140px solid transparent;
-            border-top: 100px solid var(--env-color);
+            position: absolute; top: 0; left: 0;
+            width: 0; height: 0;
+            border-left: 150px solid transparent;
+            border-right: 150px solid transparent;
+            border-top: 110px solid var(--pink-main);
             z-index: 3;
-            transition: transform 0.5s ease;
             transform-origin: top;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Le corps de l'enveloppe */
+        /* Le corps (Pocket) */
         .pocket {
-            position: absolute;
-            bottom: 0;
-            width: 0;
-            height: 0;
-            border-left: 140px solid var(--env-color);
-            border-right: 140px solid var(--env-color);
-            border-bottom: 90px solid var(--env-color);
+            position: absolute; bottom: 0; left: 0;
+            width: 0; height: 0;
+            border-left: 150px solid var(--pink-light);
+            border-right: 150px solid var(--pink-light);
+            border-bottom: 100px solid var(--pink-light);
             z-index: 4;
         }
 
-        /* La Lettre */
-        .letter {
+        /* Cachet de cire (Seal) */
+        .seal {
             position: absolute;
-            bottom: 10px;
-            left: 10px;
-            width: 260px;
-            height: 160px;
-            background: var(--letter-bg);
-            z-index: 2;
-            padding: 20px;
-            box-sizing: border-box;
-            transition: transform 0.8s ease, z-index 0s 0.4s;
-            box-shadow: 0 0 10px rgba(0,0,0,0.05);
-            overflow-y: auto;
-        }
-
-        .letter-text {
-            font-size: 10px;
-            line-height: 1.8;
-            color: var(--text-color);
-            text-align: center;
-        }
-
-        /* Animation quand on clique */
-        .envelope-wrapper.open .flap {
-            transform: rotateX(180deg);
-            z-index: 1;
-        }
-
-        .envelope-wrapper.open .letter {
-            transform: translateY(-150px) scale(1.2);
-            z-index: 5;
-        }
-
-        /* Petit coeur pixel sur l'enveloppe */
-        .heart-seal {
-            position: absolute;
-            top: 80px;
-            left: 50%;
+            top: 90px; left: 50%;
             transform: translateX(-50%);
-            width: 30px;
-            height: 30px;
+            width: 40px; height: 40px;
             background: #ff0000;
             z-index: 6;
-            clip-path: polygon(0 30%, 0 0, 30% 0, 30% 10%, 40% 10%, 40% 0, 70% 0, 70% 10%, 80% 10%, 80% 0, 100% 0, 100% 30%, 90% 30%, 90% 40%, 80% 40%, 80% 50%, 70% 50%, 70% 60%, 60% 60%, 60% 70%, 50% 70%, 50% 80%, 40% 80%, 40% 70%, 30% 70%, 30% 60%, 20% 60%, 20% 50%, 10% 50%, 10% 40%, 0 40%);
-            transition: opacity 0.3s;
+            clip-path: polygon(0 35%, 15% 15%, 35% 0, 65% 0, 85% 15%, 100% 35%, 100% 65%, 85% 85%, 65% 100%, 35% 100%, 15% 85%, 0 65%);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; color: white;
+            transition: 0.4s;
         }
 
-        .envelope-wrapper.open .heart-seal {
-            opacity: 0;
-        }
-
-        /* Coeurs qui flottent */
-        .floating-heart {
+        /* LA LETTRE */
+        .letter {
             position: absolute;
-            color: #ff4d6d;
-            font-size: 20px;
-            animation: float 3s infinite linear;
+            bottom: 10px; left: 10px;
+            width: 280px; height: 180px;
+            background: var(--paper);
+            z-index: 2;
+            padding: 25px 15px;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            display: flex; flex-direction: column;
+            align-items: center; text-align: center;
+        }
+
+        .letter-content {
+            font-size: 9px;
+            line-height: 1.8;
+            color: #333;
             opacity: 0;
-            z-index: 0;
+            transition: 0.5s 0.6s;
         }
 
-        @keyframes float {
-            0% { transform: translateY(100vh) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
-        }
+        /* ÉTAT OUVERT */
+        .open .flap { transform: rotateX(180deg); z-index: 1; }
+        .open .letter { transform: translateY(-160px) scale(1.15); z-index: 5; height: 240px; }
+        .open .letter-content { opacity: 1; }
+        .open .seal { opacity: 0; transform: translateX(-50%) scale(0); }
 
-        .pixel-text {
-            position: absolute;
-            bottom: 50px;
+        .hint {
+            margin-top: 40px;
             font-size: 8px;
-            color: var(--env-dark);
-            animation: blink 1s infinite;
+            color: var(--pink-light);
+            animation: pulse 1.5s infinite;
         }
 
-        @keyframes blink {
-            50% { opacity: 0; }
-        }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     </style>
 </head>
 <body>
 
-    <div class="envelope-wrapper" onclick="openLetter()">
-        <div class="flap"></div>
-        <div class="pocket"></div>
-        <div class="letter" id="letter">
-            <div class="letter-text">
-                POUR TOI...<br><br>
-                Chaque pixel de ma vie est plus brillant quand tu es là.<br><br>
-                Tu es ma princesse préférée.<br><br>
-                JE T'AIME ! ❤️
+    <canvas id="canvas-bg"></canvas>
+
+    <div class="container" id="main-container">
+        <div class="envelope" onclick="toggleLetter()">
+            <div class="flap"></div>
+            <div class="pocket"></div>
+            <div class="letter">
+                <div class="letter-content">
+                    <span style="color: var(--pink-dark); font-size: 12px;">BEBTOU ! ❤️</span><br><br>
+                    Tu es mon code sans bug,<br>
+                    ma variable préférée...<br><br>
+                    Même si je fais le con,<br>
+                    sache que je t'aime<br>
+                    plus que tout.<br><br>
+                    <span style="font-size: 7px;">Click again to close</span>
+                </div>
             </div>
+            <div class="seal">❤</div>
         </div>
-        <div class="heart-seal"></div>
     </div>
 
-    <div class="pixel-text">CLIQUE POUR OUVRIR</div>
+    <div class="hint" id="hint-text">TAP TO OPEN</div>
 
     <script>
-        function openLetter() {
-            document.querySelector('.envelope-wrapper').classList.toggle('open');
+        function toggleLetter() {
+            const container = document.getElementById('main-container');
+            const hint = document.getElementById('hint-text');
+            container.classList.toggle('open');
+            hint.style.display = container.classList.contains('open') ? 'none' : 'block';
         }
 
-        // Création de coeurs pixels en background
-        function createHeart() {
-            const heart = document.createElement('div');
-            heart.classList.add('floating-heart');
-            heart.innerHTML = '❤️';
-            heart.style.left = Math.random() * 100 + 'vw';
-            heart.style.animationDuration = (Math.random() * 2 + 3) + 's';
-            document.body.appendChild(heart);
-            setTimeout(() => heart.remove(), 4000);
+        // Système de particules de coeurs
+        const canvas = document.getElementById('canvas-bg');
+        const ctx = canvas.getContext('2d');
+        let hearts = [];
+
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
         }
 
-        setInterval(createHeart, 500);
+        class Heart {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + 20;
+                this.speed = Math.random() * 2 + 1;
+                this.size = Math.random() * 10 + 5;
+                this.opacity = Math.random() * 0.5 + 0.2;
+            }
+            update() {
+                this.y -= this.speed;
+                if (this.y < -20) this.reset();
+            }
+            draw() {
+                ctx.fillStyle = `rgba(255, 77, 109, ${this.opacity})`;
+                ctx.font = `${this.size}px Arial`;
+                ctx.fillText("❤️", this.x, this.y);
+            }
+        }
+
+        for(let i = 0; i < 20; i++) hearts.push(new Heart());
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            hearts.forEach(h => { h.update(); h.draw(); });
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', initCanvas);
+        initCanvas();
+        animate();
     </script>
 </body>
 </html>
