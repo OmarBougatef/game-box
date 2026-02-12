@@ -2,215 +2,197 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premium Love Letter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lettre d'Amour Premium</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Poppins:wght@300;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Poppins:wght@300;400;600&display=swap');
 
         :root {
-            --primary: #ff4d6d;
-            --secondary: #ff758f;
-            --glass: rgba(255, 255, 255, 0.15);
-            --bg: #0f0c29;
+            --primary: #d63384;
+            --secondary: #f8bbd0;
+            --bg-dark: #1a1a2e;
+            --white: #ffffff;
+            --shadow: rgba(0, 0, 0, 0.3);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            margin: 0;
+            margin: 0; padding: 0;
+            background: radial-gradient(circle at center, #2c1635 0%, #0f0c29 100%);
             height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            display: flex; align-items: center; justify-content: center;
             font-family: 'Poppins', sans-serif;
             overflow: hidden;
         }
 
-        /* Arrière-plan animé avec des lueurs */
-        .blobs {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            overflow: hidden;
+        /* Arrière-plan animé */
+        .stars {
+            position: absolute; width: 100%; height: 100%;
+            z-index: 0; pointer-events: none;
         }
 
-        .blob {
-            position: absolute;
-            background: var(--primary);
-            filter: blur(80px);
-            border-radius: 50%;
-            z-index: 0;
-            opacity: 0.3;
-            animation: move 20s infinite alternate;
-        }
-
-        @keyframes move {
-            from { transform: translate(-10%, -10%); }
-            to { transform: translate(20%, 20%); }
-        }
-
-        /* L'ENVELOPPE MODERNE */
+        /* CONTAINER PRINCIPAL */
         .wrapper {
             position: relative;
+            width: 350px; height: 250px;
             z-index: 10;
+            perspective: 1500px;
             cursor: pointer;
-            perspective: 1200px;
         }
 
+        /* L'ENVELOPPE */
         .envelope {
             position: relative;
-            width: 320px;
-            height: 200px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 100%; height: 100%;
+            background: #ff4d6d;
             border-radius: 0 0 15px 15px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            box-shadow: 0 30px 60px var(--shadow);
+            z-index: 5;
+            transition: transform 0.8s ease;
         }
 
         /* Rabat supérieur */
         .flap {
-            position: absolute;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #ff4d6d;
             clip-path: polygon(0 0, 100% 0, 50% 60%);
             border-radius: 15px 15px 0 0;
-            transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
             transform-origin: top;
-            z-index: 3;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 8;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
-        /* Corps de l'enveloppe */
-        .pocket {
-            position: absolute;
-            inset: 0;
-            background: var(--glass);
+        /* Corps avant (Pocket) */
+        .front {
+            position: absolute; bottom: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #ff758f;
             clip-path: polygon(0 40%, 50% 100%, 100% 40%, 100% 100%, 0 100%);
+            z-index: 10;
             border-radius: 0 0 15px 15px;
-            z-index: 4;
         }
 
-        /* LA LETTRE CHIC */
+        /* LA LETTRE */
         .letter {
             position: absolute;
-            top: 10%;
-            left: 5%;
-            width: 90%;
-            height: 80%;
-            background: #fff;
-            border-radius: 10px;
-            padding: 30px 20px;
-            transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-            z-index: 2;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            top: 10%; left: 5%;
+            width: 90%; height: 80%;
+            background: var(--white);
+            border-radius: 8px;
+            padding: 40px 25px;
+            z-index: 6;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: flex-start;
             text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow-y: auto;
         }
 
-        .letter h1 {
+        .letter h2 {
             font-family: 'Dancing Script', cursive;
             color: var(--primary);
-            font-size: 28px;
+            font-size: 32px;
             margin: 0 0 15px 0;
+            width: 100%;
         }
 
         .letter p {
             font-size: 14px;
+            line-height: 1.8;
             color: #444;
-            line-height: 1.6;
             margin: 0;
             font-weight: 300;
         }
 
-        /* Bouton sceau interactif */
+        /* LE SCEAU (Bouton) */
         .seal {
             position: absolute;
-            top: 50%;
-            left: 50%;
+            top: 50%; left: 50%;
             transform: translate(-50%, -10%);
-            width: 50px;
-            height: 50px;
-            background: white;
+            width: 60px; height: 60px;
+            background: radial-gradient(circle, #ff0000, #b30000);
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 5;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            transition: 0.5s;
+            z-index: 11;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3), inset 0 0 10px rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px; color: white;
+            transition: 0.5s ease;
         }
 
-        .seal span {
-            color: var(--primary);
-            font-size: 24px;
-        }
-
-        /* ÉTATS ANIMÉS */
+        /* ÉTATS OUVERTS */
         .wrapper.open .flap {
-            transform: rotateX(160deg);
+            transform: rotateX(180deg);
+            z-index: 4;
         }
 
         .wrapper.open .letter {
-            transform: translateY(-160px) scale(1.1);
-            height: 300px;
-            z-index: 6;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+            transform: translateY(-200px) scale(1.15);
+            height: 350px; /* Plus grand pour le texte */
+            z-index: 12;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.5);
         }
 
         .wrapper.open .seal {
-            opacity: 0;
-            transform: translate(-50%, -50%) scale(0);
+            opacity: 0; transform: translate(-50%, -50%) scale(0);
         }
 
+        /* INSTRUCTION */
         .instruction {
-            position: absolute;
-            bottom: -60px;
-            width: 100%;
-            text-align: center;
-            color: white;
-            font-size: 12px;
-            letter-spacing: 2px;
-            opacity: 0.6;
-            text-transform: uppercase;
+            position: absolute; bottom: -80px; width: 100%;
+            text-align: center; color: white;
+            font-size: 12px; letter-spacing: 2px;
+            text-transform: uppercase; animation: blink 2s infinite;
         }
+
+        @keyframes blink { 0%, 100% { opacity: 0.8; } 50% { opacity: 0.2; } }
     </style>
 </head>
 <body>
 
-    <div class="blobs">
-        <div class="blob" style="width: 400px; height: 400px; top: -100px; left: -100px;"></div>
-        <div class="blob" style="width: 300px; height: 300px; bottom: -50px; right: -50px; background: #7209b7;"></div>
-    </div>
+    <div class="stars" id="particles"></div>
 
-    <div class="wrapper" id="mail" onclick="openMe()">
+    <div class="wrapper" id="mainContainer" onclick="toggleLetter()">
         <div class="flap"></div>
         <div class="letter">
-            <h1>Ma Princesse,</h1>
+            <h2>Ma Princesse,</h2>
             <p>
-                Certaines choses ne s'expliquent pas avec des mots compliqués.<br><br>
-                Tu es la plus belle rencontre de ma vie, et je voulais juste te rappeler à quel point tu es précieuse pour moi.<br><br>
-                <b>Je t'aime. ❤️</b>
+                Il y a des moments où les mots manquent pour exprimer ce que je ressens vraiment.<br><br>
+                Tu es la personne la plus incroyable que j'ai jamais rencontrée. Ta présence illumine mes journées et ton sourire est mon plus beau cadeau.<br><br>
+                Je voulais juste prendre un instant pour te dire que <strong>je t'aime plus que tout.</strong> ❤️
             </p>
         </div>
-        <div class="pocket"></div>
-        <div class="seal">
-            <span>❤</span>
-        </div>
-        <div class="instruction">Tap to open</div>
+        <div class="front"></div>
+        <div class="seal">❤</div>
+        <div class="instruction">Appuie pour ouvrir</div>
     </div>
 
     <script>
-        function openMe() {
-            document.getElementById('mail').classList.toggle('open');
+        function toggleLetter() {
+            document.getElementById('mainContainer').classList.toggle('open');
         }
+
+        // Système de particules fluide
+        function createStars() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.style.position = 'absolute';
+                star.style.width = Math.random() * 3 + 'px';
+                star.style.height = star.style.width;
+                star.style.background = 'white';
+                star.style.borderRadius = '50%';
+                star.style.top = Math.random() * 100 + 'vh';
+                star.style.left = Math.random() * 100 + 'vw';
+                star.style.opacity = Math.random();
+                star.style.boxShadow = '0 0 10px white';
+                container.appendChild(star);
+            }
+        }
+        createStars();
     </script>
 </body>
 </html>
