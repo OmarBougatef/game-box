@@ -2,148 +2,191 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Love Arcade - Fixed</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lettre d'Amour Pixel</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-        body { margin: 0; background: #000; color: #fff; font-family: 'Press Start 2P', cursive; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
-        canvas { background: #111; display: block; width: 100vw; height: 60vh; image-rendering: pixelated; border-bottom: 4px solid #ff0055; }
-        .ui { flex-grow: 1; display: flex; flex-direction: column; background: #0a0a0a; }
-        .stats { padding: 10px; font-size: 10px; display: flex; justify-content: space-between; color: #ffd700; }
-        .controls { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; flex-grow: 1; gap: 5px; padding: 5px; }
-        .btn { background: #222; border: 2px solid #444; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 20px; border-radius: 10px; }
-        .btn:active { background: #ff0055; border-color: #fff; }
-        .full-btn { grid-column: span 2; }
-        .menu { position: absolute; inset: 0; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 90%; }
-        .m-btn { background: #1a1a1a; border: 2px solid #fff; padding: 15px 5px; color: #fff; font-family: inherit; font-size: 8px; }
+
+        :root {
+            --bg: #ffccd5;
+            --env-color: #ff4d6d;
+            --env-dark: #c9184a;
+            --letter-bg: #fff5f5;
+            --text-color: #590d22;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: var(--bg);
+            font-family: 'Press Start 2P', cursive;
+            overflow: hidden;
+        }
+
+        /* Container de l'enveloppe */
+        .envelope-wrapper {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .envelope-wrapper:hover {
+            transform: scale(1.05);
+        }
+
+        .envelope {
+            position: relative;
+            width: 280px;
+            height: 180px;
+            background-color: var(--env-dark);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        /* Le rabat de l'enveloppe */
+        .flap {
+            position: absolute;
+            top: 0;
+            width: 0;
+            height: 0;
+            border-left: 140px solid transparent;
+            border-right: 140px solid transparent;
+            border-top: 100px solid var(--env-color);
+            z-index: 3;
+            transition: transform 0.5s ease;
+            transform-origin: top;
+        }
+
+        /* Le corps de l'enveloppe */
+        .pocket {
+            position: absolute;
+            bottom: 0;
+            width: 0;
+            height: 0;
+            border-left: 140px solid var(--env-color);
+            border-right: 140px solid var(--env-color);
+            border-bottom: 90px solid var(--env-color);
+            z-index: 4;
+        }
+
+        /* La Lettre */
+        .letter {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            width: 260px;
+            height: 160px;
+            background: var(--letter-bg);
+            z-index: 2;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: transform 0.8s ease, z-index 0s 0.4s;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+            overflow-y: auto;
+        }
+
+        .letter-text {
+            font-size: 10px;
+            line-height: 1.8;
+            color: var(--text-color);
+            text-align: center;
+        }
+
+        /* Animation quand on clique */
+        .envelope-wrapper.open .flap {
+            transform: rotateX(180deg);
+            z-index: 1;
+        }
+
+        .envelope-wrapper.open .letter {
+            transform: translateY(-150px) scale(1.2);
+            z-index: 5;
+        }
+
+        /* Petit coeur pixel sur l'enveloppe */
+        .heart-seal {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 30px;
+            background: #ff0000;
+            z-index: 6;
+            clip-path: polygon(0 30%, 0 0, 30% 0, 30% 10%, 40% 10%, 40% 0, 70% 0, 70% 10%, 80% 10%, 80% 0, 100% 0, 100% 30%, 90% 30%, 90% 40%, 80% 40%, 80% 50%, 70% 50%, 70% 60%, 60% 60%, 60% 70%, 50% 70%, 50% 80%, 40% 80%, 40% 70%, 30% 70%, 30% 60%, 20% 60%, 20% 50%, 10% 50%, 10% 40%, 0 40%);
+            transition: opacity 0.3s;
+        }
+
+        .envelope-wrapper.open .heart-seal {
+            opacity: 0;
+        }
+
+        /* Coeurs qui flottent */
+        .floating-heart {
+            position: absolute;
+            color: #ff4d6d;
+            font-size: 20px;
+            animation: float 3s infinite linear;
+            opacity: 0;
+            z-index: 0;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+
+        .pixel-text {
+            position: absolute;
+            bottom: 50px;
+            font-size: 8px;
+            color: var(--env-dark);
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
     </style>
 </head>
 <body>
 
-<canvas id="c"></canvas>
-<div class="ui">
-    <div class="stats"><span id="sc">SCORE: 0</span><span id="gm">MENU</span></div>
-    <div id="ctrls" class="controls">
-        <div class="btn" onpointerdown="K.l=1" onpointerup="K.l=0">◀</div>
-        <div class="btn" onpointerdown="K.r=1" onpointerup="K.r=0">▶</div>
-        <div class="btn" onpointerdown="K.u=1" onpointerup="K.u=0">▲</div>
-        <div class="btn" onpointerdown="K.d=1" onpointerup="K.d=0">▼</div>
+    <div class="envelope-wrapper" onclick="openLetter()">
+        <div class="flap"></div>
+        <div class="pocket"></div>
+        <div class="letter" id="letter">
+            <div class="letter-text">
+                POUR TOI...<br><br>
+                Chaque pixel de ma vie est plus brillant quand tu es là.<br><br>
+                Tu es ma princesse préférée.<br><br>
+                JE T'AIME ! ❤️
+            </div>
+        </div>
+        <div class="heart-seal"></div>
     </div>
-</div>
 
-<div id="menu" class="menu">
-    <h2 style="color:#ff0055; font-size:14px;">LOVE ARCADE V4</h2>
-    <div class="grid">
-        <button class="m-btn" onclick="start('MAZE')">🏰 MAZE</button>
-        <button class="m-btn" onclick="start('CATCH')">❤️ CATCH</button>
-        <button class="m-btn" onclick="start('SHIELD')">🛡️ SHIELD</button>
-        <button class="m-btn" onclick="start('FLY')">🕊️ FLY</button>
-        <button class="m-btn" onclick="start('KISS')">💋 KISS</button>
-        <button class="m-btn" onclick="start('UP')">🚀 UP</button>
-    </div>
-</div>
+    <div class="pixel-text">CLIQUE POUR OUVRIR</div>
 
-<script>
-const cvs = document.getElementById('c'), ctx = cvs.getContext('2d');
-const K = {l:0, r:0, u:0, d:0};
-let mode = '', score = 0, p = {}, items = [], timer = 0, active = false;
+    <script>
+        function openLetter() {
+            document.querySelector('.envelope-wrapper').classList.toggle('open');
+        }
 
-// Fix canvas size
-cvs.width = 320; cvs.height = 320;
+        // Création de coeurs pixels en background
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.classList.add('floating-heart');
+            heart.innerHTML = '❤️';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.animationDuration = (Math.random() * 2 + 3) + 's';
+            document.body.appendChild(heart);
+            setTimeout(() => heart.remove(), 4000);
+        }
 
-function start(m) {
-    mode = m; score = 0; items = []; timer = 0; active = true;
-    document.getElementById('menu').style.display = 'none';
-    document.getElementById('gm').innerText = m;
-    init();
-}
-
-function over(t) {
-    active = false;
-    document.getElementById('menu').style.display = 'flex';
-    alert(t + " | Score: " + score);
-}
-
-function init() {
-    if(mode==='MAZE') p = {x:40, y:40};
-    if(mode==='CATCH') p = {x:160};
-    if(mode==='SHIELD') p = {a:0};
-    if(mode==='FLY') p = {y:160, v:0};
-    if(mode==='KISS') p = {a:0, t:Math.random()*6, s:0.05};
-    if(mode==='UP') p = {x:160, y:280, v:0};
-}
-
-function loop() {
-    if(!active) { requestAnimationFrame(loop); return; }
-    ctx.clearRect(0,0,320,320);
-    timer++;
-
-    if(mode==='MAZE') {
-        if(K.l) p.x-=2; if(K.r) p.x+=2; if(K.u) p.y-=2; if(K.d) p.y+=2;
-        ctx.fillStyle='#444'; ctx.fillRect(100,0,20,200); ctx.fillRect(200,100,20,220); // Murs simples
-        if(p.x<0||p.x>300||p.y<0||p.y>300) over("MUR !");
-        ctx.fillStyle='#0f0'; ctx.fillRect(280,280,40,40);
-        if(p.x>270&&p.y>270) over("GAGNE !");
-    }
-
-    if(mode==='CATCH') {
-        if(K.l) p.x-=4; if(K.r) p.x+=4;
-        if(timer%40===0) items.push({x:Math.random()*300, y:0});
-        items.forEach((it,i)=>{
-            it.y+=3; ctx.fillText("❤️", it.x, it.y);
-            if(it.y>280 && Math.abs(it.x-p.x)<30) { items.splice(i,1); score++; }
-            if(it.y>320) over("PERDU");
-        });
-    }
-
-    if(mode==='SHIELD') {
-        if(K.l) p.a-=0.1; if(K.r) p.a+=0.1;
-        ctx.strokeStyle='#0df'; ctx.lineWidth=5; ctx.beginPath();
-        ctx.arc(160,160,50,p.a,p.a+1); ctx.stroke();
-        if(timer%50===0) { let a=Math.random()*7; items.push({x:160+Math.cos(a)*150, y:160+Math.sin(a)*150, a:a}); }
-        items.forEach((e,i)=>{
-            e.x-=Math.cos(e.a)*2; e.y-=Math.sin(e.a)*2; ctx.fillStyle='red'; ctx.fillRect(e.x,e.y,5,5);
-            if(Math.hypot(e.x-160, e.y-160)<50) {
-                if(Math.abs((Math.atan2(e.y-160,e.x-160)-p.a)%7)<1) { items.splice(i,1); score++; }
-                else over("TOUCHEE");
-            }
-        });
-    }
-
-    if(mode==='FLY') {
-        p.v+=0.2; p.y+=p.v; if(K.u||K.l||K.r) p.v=-4;
-        if(timer%100===0) items.push({x:320, h:Math.random()*150});
-        items.forEach((w,i)=>{
-            w.x-=2; ctx.fillStyle='#555'; ctx.fillRect(w.x,0,30,w.h); ctx.fillRect(w.x,w.h+100,30,320);
-            if(w.x<60&&w.x>30&&(p.y<w.h||p.y>w.h+80)) over("BOOM");
-            if(w.x===-20) score++;
-        });
-        if(p.y>320||p.y<0) over("EXIT");
-    }
-
-    if(mode==='KISS') {
-        p.a+=p.s; ctx.strokeStyle='gold'; ctx.beginPath(); ctx.arc(160,160,60,p.t,p.t+0.5); ctx.stroke();
-        let kx=160+Math.cos(p.a)*60, ky=160+Math.sin(p.a)*60; ctx.fillText("💋", kx, ky);
-        if(K.u||K.l||K.r) { if(Math.abs(p.a%7-p.t)<0.5) { score++; p.t=Math.random()*6; p.s+=0.01; } else over("RATE"); }
-    }
-
-    if(mode==='UP') {
-        p.v+=0.2; p.y+=p.v; if(K.l) p.x-=3; if(K.r) p.x+=3;
-        if(items.length===0) for(let i=0;i<5;i++) items.push({x:Math.random()*250, y:i*60});
-        items.forEach(pl=>{
-            ctx.fillStyle='#f05'; ctx.fillRect(pl.x,pl.y,60,10);
-            if(p.v>0&&p.x>pl.x-20&&p.x<pl.x+60&&Math.abs(p.y-pl.y)<10) { p.v=-7; score++; }
-            pl.y+=1; if(pl.y>320) { pl.y=0; pl.x=Math.random()*250; }
-        });
-        if(p.y>320) over("CHUTE");
-    }
-
-    ctx.fillStyle='#ff0055'; ctx.fillRect(p.x||160, p.y||160, 20, 20); // Joueur
-    document.getElementById('sc').innerText = "SCORE: " + score;
-    requestAnimationFrame(loop);
-}
-loop();
-</script>
+        setInterval(createHeart, 500);
+    </script>
 </body>
 </html>
